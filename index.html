@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Align27 Revenue Reports Hub</title>
+<style>
+  :root {
+    --bg: #080d1c;
+    --card: #141a33;
+    --card2: #1b2247;
+    --border: rgba(139,92,246,0.18);
+    --violet: #8b5cf6;
+    --pink: #ec4899;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 48px 32px 36px;
+    text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 50%, rgba(236,72,153,0.10) 0%, transparent 60%);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(139,92,246,0.15);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--violet), var(--pink), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .hero p { color: var(--muted); font-size: 14px; }
+
+  /* ── Main layout ── */
+  .container { max-width: 980px; margin: 0 auto; padding: 0 24px 60px; }
+
+  /* ── Controls bar ── */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .date-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    flex: 1;
+    min-width: 200px;
+  }
+  .date-picker-wrap label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .date-picker-wrap input[type="date"] {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    color-scheme: dark;
+    width: 100%;
+  }
+  .btn-today {
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .2s;
+  }
+  .btn-today:hover { opacity: .85; }
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .search-wrap input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+
+  /* ── Date quick-nav ── */
+  .quick-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .quick-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .quick-chip:hover, .quick-chip.active {
+    background: rgba(139,92,246,0.2);
+    border-color: var(--violet);
+    color: var(--text);
+  }
+
+  /* ── Report viewer ── */
+  .viewer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card2);
+  }
+  .viewer-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+  }
+  .status-dot.missing { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .viewer-date { font-size: 15px; font-weight: 700; color: var(--text); }
+  .viewer-sub { font-size: 11px; color: var(--muted); }
+  .viewer-actions { display: flex; gap: 8px; }
+  .btn-action {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 5px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .2s;
+  }
+  .btn-action:hover { background: rgba(139,92,246,0.15); color: var(--text); border-color: var(--violet); }
+  .btn-action.primary {
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    border-color: transparent;
+    color: #fff;
+  }
+  .btn-action.primary:hover { opacity: .85; }
+
+  .iframe-wrap {
+    position: relative;
+    height: 680px;
+    background: #05091a;
+  }
+  .iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    gap: 12px;
+    color: var(--muted);
+  }
+  .not-found .icon { font-size: 48px; opacity: .4; }
+  .not-found h3 { font-size: 16px; color: var(--text); }
+  .not-found p { font-size: 13px; text-align: center; max-width: 340px; line-height: 1.6; }
+
+  /* ── Report calendar grid ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title span { flex: 1; height: 1px; background: var(--border); }
+
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .report-tile {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .report-tile:hover {
+    border-color: var(--violet);
+    background: rgba(139,92,246,0.08);
+    transform: translateY(-1px);
+  }
+  .report-tile.selected {
+    border-color: var(--violet);
+    background: rgba(139,92,246,0.15);
+    box-shadow: 0 0 0 1px var(--violet) inset;
+  }
+  .report-tile.missing {
+    opacity: .45;
+    cursor: default;
+  }
+  .report-tile.missing:hover { transform: none; }
+  .tile-date { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .tile-day { font-size: 11px; color: var(--muted); }
+  .tile-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(16,185,129,0.15);
+    color: var(--green);
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .tile-badge.missing {
+    background: rgba(239,68,68,0.12);
+    color: var(--red);
+    border-color: rgba(239,68,68,0.2);
+  }
+  .tile-badge.today {
+    background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3));
+    color: var(--pink);
+    border-color: var(--pink);
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+  }
+  .stat-pill .val {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-pill .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">✦ Revenue Intelligence</div>
+  <h1>Align27 Daily Report Hub</h1>
+  <p>Select any date to view that day's revenue report · Auto-updated daily</p>
+</div>
+
+<div class="container">
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill"><div class="val" id="statTotal">—</div><div class="lbl">Total Reports</div></div>
+    <div class="stat-pill"><div class="val" id="statStreak">—</div><div class="lbl">Day Streak</div></div>
+    <div class="stat-pill"><div class="val" id="statLatest">—</div><div class="lbl">Latest Report</div></div>
+    <div class="stat-pill"><div class="val" id="statMissing">—</div><div class="lbl">Missing Days</div></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="date-picker-wrap">
+      <label>📅 Jump to date</label>
+      <input type="date" id="datePicker" />
+    </div>
+    <div class="search-wrap">
+      <span style="color:var(--muted);font-size:13px">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search by date (e.g. Jun 14)…" />
+    </div>
+    <button class="btn-today" onclick="goToday()">Today</button>
+  </div>
+
+  <!-- Quick nav chips -->
+  <div class="quick-nav" id="quickNav">
+    <div class="quick-chip" onclick="filterQuick('all')">All</div>
+    <div class="quick-chip" onclick="filterQuick('this-week')">This Week</div>
+    <div class="quick-chip" onclick="filterQuick('last-7')">Last 7 Days</div>
+    <div class="quick-chip" onclick="filterQuick('this-month')">This Month</div>
+    <div class="quick-chip" onclick="filterQuick('available')">Available Only</div>
+  </div>
+
+  <!-- Report viewer -->
+  <div class="viewer-card" id="viewerCard">
+    <div class="viewer-header">
+      <div class="viewer-title">
+        <div class="status-dot" id="viewerDot"></div>
+        <div>
+          <div class="viewer-date" id="viewerDate">Select a date to view report</div>
+          <div class="viewer-sub" id="viewerSub">Click any tile below or use the date picker</div>
+        </div>
+      </div>
+      <div class="viewer-actions">
+        <a id="btnOpenTab" class="btn-action" href="#" target="_blank" style="display:none">↗ Open in Tab</a>
+        <a id="btnDownload" class="btn-action" href="#" download style="display:none">⬇ Download</a>
+      </div>
+    </div>
+    <div class="iframe-wrap" id="iframeWrap">
+      <div class="not-found" id="welcomeMsg">
+        <div class="icon">📊</div>
+        <h3>Align27 Daily Reports</h3>
+        <p>Select any date below or use the date picker above to load that day's revenue report in this viewer.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar grid -->
+  <div class="section-title">📁 Report Archive <span></span></div>
+  <div class="report-grid" id="reportGrid"></div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG — edit BASE_URL to your Vercel domain
+// ─────────────────────────────────────────────
+const CONFIG = {
+  BASE_URL: '', // e.g. 'https://align27-reports.vercel.app' — leave empty for relative paths
+  REPORTS_PATH: 'reports',
+  REGISTRY_PATH: 'reports/registry.json',
+  // If registry.json not available, generate last N days:
+  FALLBACK_DAYS: 30
+};
+
+// Days of week / months
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toISO(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+function friendlyDate(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return `${DAYS[dt.getDay()]}, ${MONTHS[m-1]} ${d}, ${y}`;
+}
+function reportURL(iso) {
+  const base = CONFIG.BASE_URL ? CONFIG.BASE_URL.replace(/\/$/, '') : '';
+  return `${base}/${CONFIG.REPORTS_PATH}/${iso}.html`;
+}
+
+// State
+let availableDates = new Set();
+let allDates = [];
+let selectedDate = null;
+let activeFilter = 'all';
+let searchTerm = '';
+
+// ── Load registry ──
+async function loadRegistry() {
+  try {
+    const url = CONFIG.BASE_URL
+      ? `${CONFIG.BASE_URL.replace(/\/$/,'')}/${CONFIG.REGISTRY_PATH}`
+      : CONFIG.REGISTRY_PATH;
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('No registry');
+    const dates = await res.json();
+    return dates.sort().reverse();
+  } catch {
+    // Fallback: check last N days
+    return [];
+  }
+}
+
+// ── Generate date range ──
+function genDateRange(days) {
+  const dates = [];
+  const today = new Date();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    dates.push(toISO(d));
+  }
+  return dates;
+}
+
+// ── Render stats ──
+function renderStats() {
+  const available = allDates.filter(d => availableDates.has(d));
+  document.getElementById('statTotal').textContent = available.length;
+  document.getElementById('statLatest').textContent = available.length ? available[0].slice(5) : '—';
+
+  // Streak
+  let streak = 0;
+  const today = toISO(new Date());
+  for (const d of allDates) {
+    if (availableDates.has(d)) streak++;
+    else break;
+  }
+  document.getElementById('statStreak').textContent = streak + (streak === 1 ? ' day' : ' days');
+
+  // Missing
+  const firstAvail = available.length ? available[available.length - 1] : null;
+  let missing = 0;
+  if (firstAvail) {
+    for (const d of allDates) {
+      if (d < firstAvail) break;
+      if (!availableDates.has(d)) missing++;
+    }
+  }
+  document.getElementById('statMissing').textContent = missing;
+}
+
+// ── Filter logic ──
+function getFilteredDates() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return allDates.filter(iso => {
+    const [y,m,d] = iso.split('-').map(Number);
+    const dt = new Date(y,m-1,d);
+
+    // Quick filter
+    if (activeFilter === 'available' && !availableDates.has(iso)) return false;
+    if (activeFilter === 'last-7') {
+      const diff = (today - dt) / 86400000;
+      if (diff > 7) return false;
+    }
+    if (activeFilter === 'this-week') {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      if (dt < startOfWeek) return false;
+    }
+    if (activeFilter === 'this-month') {
+      if (dt.getMonth() !== today.getMonth() || dt.getFullYear() !== today.getFullYear()) return false;
+    }
+
+    // Search
+    if (searchTerm) {
+      const friendly = friendlyDate(iso).toLowerCase();
+      if (!iso.includes(searchTerm) && !friendly.includes(searchTerm)) return false;
+    }
+
+    return true;
+  });
+}
+
+// ── Render grid ──
+function renderGrid() {
+  const filtered = getFilteredDates();
+  const grid = document.getElementById('reportGrid');
+  const todayISO = toISO(new Date());
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:32px;font-size:13px">No reports found for this filter.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(iso => {
+    const [y,m,d] = iso.split('-').map(Number);
+    const dt = new Date(y,m-1,d);
+    const dayName = DAYS[dt.getDay()];
+    const monthName = MONTHS[m-1];
+    const avail = availableDates.has(iso);
+    const isToday = iso === todayISO;
+    const isSelected = iso === selectedDate;
+
+    let badgeClass = avail ? '' : 'missing';
+    let badgeText = avail ? (isToday ? 'Today' : 'Ready') : 'Missing';
+    if (isToday && avail) badgeClass = 'today';
+
+    return `<div class="report-tile ${avail ? '' : 'missing'} ${isSelected ? 'selected' : ''}"
+      onclick="${avail ? `loadReport('${iso}')` : ''}">
+      <div class="tile-badge ${badgeClass}">${badgeText}</div>
+      <div class="tile-date">${monthName} ${d}</div>
+      <div class="tile-day">${dayName} · ${y}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Load report ──
+function loadReport(iso) {
+  selectedDate = iso;
+  const avail = availableDates.has(iso);
+  const dot = document.getElementById('viewerDot');
+  const title = document.getElementById('viewerDate');
+  const sub = document.getElementById('viewerSub');
+  const wrap = document.getElementById('iframeWrap');
+  const btnTab = document.getElementById('btnOpenTab');
+  const btnDl = document.getElementById('btnDownload');
+
+  title.textContent = friendlyDate(iso);
+  dot.className = 'status-dot' + (avail ? '' : ' missing');
+
+  if (avail) {
+    const url = reportURL(iso);
+    sub.textContent = `Align27 Revenue Report · ${iso}`;
+    wrap.innerHTML = `<iframe src="${url}" title="Report ${iso}" loading="lazy"></iframe>`;
+    btnTab.href = url; btnTab.style.display = '';
+    btnDl.href = url; btnDl.style.display = '';
+  } else {
+    sub.textContent = 'Report not generated yet for this date';
+    wrap.innerHTML = `<div class="not-found">
+      <div class="icon">🗓</div>
+      <h3>Report Not Available</h3>
+      <p>No revenue report was generated for ${friendlyDate(iso)}. Run the daily Cowork task to generate it.</p>
+    </div>`;
+    btnTab.style.display = 'none';
+    btnDl.style.display = 'none';
+  }
+
+  // Update datepicker
+  document.getElementById('datePicker').value = iso;
+
+  // Re-render grid to show selection
+  renderGrid();
+
+  // Scroll to viewer
+  document.getElementById('viewerCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Quick filter ──
+function filterQuick(key) {
+  activeFilter = key;
+  document.querySelectorAll('.quick-chip').forEach((el, i) => {
+    el.classList.toggle('active', ['all','this-week','last-7','this-month','available'][i] === key);
+  });
+  renderGrid();
+}
+
+// ── Go today ──
+function goToday() {
+  const iso = toISO(new Date());
+  if (availableDates.has(iso)) {
+    loadReport(iso);
+  } else {
+    document.getElementById('datePicker').value = iso;
+    loadReport(iso);
+  }
+}
+
+// ── Check if a date's report exists (HEAD request) ──
+async function checkReportExists(iso) {
+  try {
+    const res = await fetch(reportURL(iso), { method: 'HEAD', cache: 'no-cache' });
+    return res.ok;
+  } catch { return false; }
+}
+
+// ── Init ──
+async function init() {
+  // Generate base date list (last 30 days + grow as reports come in)
+  const baseDates = genDateRange(CONFIG.FALLBACK_DAYS);
+
+  // Try loading registry
+  const registered = await loadRegistry();
+
+  // Merge: registered dates + last 30 days
+  const merged = [...new Set([...registered, ...baseDates])].sort().reverse();
+  allDates = merged;
+
+  // Mark registered dates as available
+  registered.forEach(d => availableDates.add(d));
+
+  // If no registry, probe each date (parallel, limit 10)
+  if (registered.length === 0) {
+    const chunks = [];
+    for (let i = 0; i < baseDates.length; i += 5) chunks.push(baseDates.slice(i, i+5));
+    for (const chunk of chunks) {
+      const results = await Promise.all(chunk.map(iso =>
+        checkReportExists(iso).then(ok => ({ iso, ok }))
+      ));
+      results.forEach(({ iso, ok }) => { if (ok) availableDates.add(iso); });
+    }
+  }
+
+  renderStats();
+  renderGrid();
+
+  // Auto-load today if available
+  const todayISO = toISO(new Date());
+  if (availableDates.has(todayISO)) {
+    loadReport(todayISO);
+  } else if (registered.length > 0) {
+    loadReport(registered[0]);
+  }
+}
+
+// ── Event listeners ──
+document.getElementById('datePicker').addEventListener('change', e => {
+  if (e.target.value) loadReport(e.target.value);
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  renderGrid();
+});
+
+// Init quick chips
+document.querySelectorAll('.quick-chip')[0].classList.add('active');
+
+init();
+</script>
+</body>
+</html>
